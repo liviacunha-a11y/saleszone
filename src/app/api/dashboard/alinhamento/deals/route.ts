@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { createSquadSupabaseAdmin } from "@/lib/squad/supabase";
 import { SQUADS, PV_COLS, V_COLS, SQUAD_V_MAP } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
@@ -36,7 +36,8 @@ interface MisalignedDeal {
 
 export async function GET() {
   try {
-    const { data: deals, error } = await supabase
+    const admin = createSquadSupabaseAdmin();
+    const { data: deals, error } = await admin
       .from("squad_alignment_deals")
       .select("deal_id, title, empreendimento, owner_name");
 

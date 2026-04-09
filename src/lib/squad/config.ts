@@ -55,8 +55,19 @@ const SZI_EMP_OPTIONS: Record<number, string> = {
 
 const SZS_SQUADS: Squad[] = [
   {
-    id: 1, name: 'Gestão SZS', color: '#10B981',
-    marketing: '', preVenda: [], venda: [], empreendimentos: [],
+    id: 1, name: 'Marketing', color: '#2563EB',
+    marketing: 'Raquel', preVenda: ['Joyce'], venda: ['Gabi Lemos'], empreendimentos: [],
+    canais: ['Marketing'],
+  },
+  {
+    id: 2, name: 'Parceiros', color: '#9333EA',
+    marketing: 'Raynara', preVenda: ['Raynara Lopes'], venda: ['Gabriela Branco'], empreendimentos: [],
+    canais: ['Parceiros'],
+  },
+  {
+    id: 3, name: 'Expansão', color: '#059669',
+    marketing: 'Larissa', preVenda: ['Larissa Marques'], venda: ['Giovanna Zanchetta'], empreendimentos: [],
+    canais: ['Expansão'],
   },
 ]
 

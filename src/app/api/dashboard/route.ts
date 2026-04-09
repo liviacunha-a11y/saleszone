@@ -249,8 +249,19 @@ export async function GET(req: NextRequest) {
     if (nektData) {
       const metaPago = Number(nektData.won_szi_meta_pago) || 0;
       const metaDireto = Number(nektData.won_szi_meta_direto) || 0;
-      // Filtro paid/marketing/ctwa usa só meta pago; geral usa ambos
-      const wonMetaTotal = hasFilter ? metaPago : metaPago + metaDireto;
+      const metaGeralWon = metaPago + metaDireto;
+      // Meta WON proporcional ao share real do filtro (WON 90d): Geral > MKT > Mídia Paga > CTWA
+      let wonMetaTotal: number;
+      if (!hasFilter) {
+        wonMetaTotal = metaGeralWon;
+      } else if (ctwaOnly) {
+        wonMetaTotal = Math.max(1, Math.round(metaGeralWon * 0.01));
+      } else if (paidOnly) {
+        wonMetaTotal = Math.round(metaGeralWon * 0.23); // ~23% share (38/167)
+      } else {
+        // Marketing
+        wonMetaTotal = Math.round(metaGeralWon * 0.32); // ~32% share (54/167)
+      }
       const wonPerCloser = wonMetaTotal / TOTAL_CLOSERS;
 
       // Build per-squad 90d counts
@@ -264,30 +275,14 @@ export async function GET(req: NextRequest) {
         squadCounts.set(sq.id, { mql: 0, sql: 0, opp: 0, won: 0 });
       }
 
-      if (hasFilter && filteredDeals90) {
-        // Ratios filtrados: contar MQL/SQL/OPP/WON a partir de squad_deals (max_stage_order)
-        for (const d of filteredDeals90) {
-          if (d.lost_reason === "Duplicado/Erro") continue;
-          const emp = d.empreendimento;
-          const mso = d.max_stage_order || 0;
-          for (const sq of SQUADS) {
-            if (squadEmpSets.get(sq.id)!.has(emp)) {
-              const c = squadCounts.get(sq.id)!;
-              if (mso >= STAGE_THRESHOLDS.mql) c.mql++;
-              if (mso >= STAGE_THRESHOLDS.sql) c.sql++;
-              if (mso >= STAGE_THRESHOLDS.opp) c.opp++;
-              if (d.status === "won") c.won++;
-            }
-          }
-        }
-      } else {
-        // Geral: ratios de squad_daily_counts (todos os canais)
-        for (const r of counts90Res.data || []) {
-          for (const sq of SQUADS) {
-            if (squadEmpSets.get(sq.id)!.has(r.empreendimento)) {
-              const c = squadCounts.get(sq.id)!;
-              if (r.tab in c) c[r.tab] += r.count || 0;
-            }
+      // Sempre usar ratios de squad_daily_counts (Geral) para metas
+      // Isso garante hierarquia: Meta Geral > Meta MKT > Meta Mídia Paga > Meta CTWA
+      // (a diferença entre filtros é apenas o wonMetaTotal proporcional)
+      for (const r of counts90Res.data || []) {
+        for (const sq of SQUADS) {
+          if (squadEmpSets.get(sq.id)!.has(r.empreendimento)) {
+            const c = squadCounts.get(sq.id)!;
+            if (r.tab in c) c[r.tab] += r.count || 0;
           }
         }
       }

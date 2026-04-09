@@ -55,7 +55,7 @@ const METAS_BY_MONTH: Record<string, Record<string, ChannelMetas>> = {
   "2026-04": {
     "Vendas Diretas": { leads: 4726, mql: 3953, sql: 966, opp: 236, won: 26 },
     Parceiros: { mql: 896, sql: 154, opp: 126, won: 38 },
-    Geral: { mql: 4849, sql: 1120, opp: 362, won: 64 },
+    Geral: { mql: 4931, sql: 1141, opp: 360, won: 64 },
   },
 };
 
